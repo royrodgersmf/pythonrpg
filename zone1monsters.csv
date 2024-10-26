@@ -1,0 +1,4 @@
+﻿enemy_name,enemy_maxhealth,enemy_health,enemy_strength,enemy_speed,enemy_xp,weight
+rat,10,10,2,3,5,0.55
+spider,15,15,5,7,7.5,0.4
+snake,30,30,10,12,15,0.5
