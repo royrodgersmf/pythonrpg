@@ -106,7 +106,51 @@ def level_up(player_name, player_xp, player_xptolevel, player_level, player_heal
         print(Fore.GREEN + f"{player_name}" + Fore.WHITE +" is now " + Fore.YELLOW +f"[level {player_level}]" + Fore.WHITE +"! Exp needed for " + Fore.YELLOW + f"level {player_level+1}" + Fore.WHITE + f": {player_xptolevel}exp. " + Fore.YELLOW + f"Current exp: " + Fore.WHITE + f"{player_xp}exp.")
     return player_xp, player_level, player_health, player_maxhealth, player_strength, player_speed
 
-#Combat system.
+#Inventory System:
+def item(items_dict, player_name, player_health, player_maxhealth):
+    while True:
+        remove_zero_quantity_items(items_dict)
+        print("")
+        print(Fore.BLUE + "==========" + Fore.WHITE)
+        print_dict_with_newlines(items_dict)
+        print(Fore.BLUE + "==========" + Fore.WHITE)
+        print("")
+
+        item = input("Which " + Fore.YELLOW +"item " + Fore.WHITE +"would you like to use? "+ Fore.RED +"<c to cancel>" + Fore.WHITE +": ")
+
+
+        #Potion:
+        if item == "potion":
+
+            #If potion is in inventory and potions are greater than 0:
+            if "potion" in items_dict and items_dict["potion"] > 0:
+
+                #Heal:
+                print(Fore.GREEN + f"{player_name} " + Fore.WHITE +"used a " + Fore.YELLOW +"potion" + Fore.WHITE + "!")
+                player_health = player_health + 10
+                items_dict['potion'] -= 1
+                #If players health exceeds maxhealth after heal:
+                if player_health > player_maxhealth:
+                    player_health = player_maxhealth
+                print(Fore.GREEN + f"{player_name} "+ Fore.WHITE + "healed 10hp, "+ Fore.GREEN+ f"{player_name}s " + Fore.WHITE +"health is now: " + Fore.RED + f"{player_health}/{player_maxhealth}" + Fore.WHITE + ".")
+                print(f"{player_name} now has {items_dict['potion']} " + Fore.YELLOW + "potions" + Fore.WHITE + ".")
+                return items_dict, player_health, False
+            
+            else:
+                print("This item is not in your inventory.")
+                continue
+                
+
+                            #Cancel
+        elif item == "c":
+            return items_dict, player_health, True
+
+                #invalid input:
+        else:
+            print("This item is not in your inventory.")
+            continue
+    
+#Combat System:
 def combat(player_name, player_health, player_maxhealth, player_strength, player_speed, enemy_name, enemy_health, enemy_maxhealth, enemy_strength, enemy_speed, items_dict):
     print(Fore.GREEN + f"{player_name} " + Fore.WHITE + f"encountered a " + Fore.MAGENTA + f"{enemy_name}" + Fore.WHITE + ", health: " + Fore.RED + f"{enemy_health}/{enemy_maxhealth}" + Fore.WHITE +"!")
 
@@ -140,71 +184,36 @@ def combat(player_name, player_health, player_maxhealth, player_strength, player
         
         #Item:
         if attack == "item":
-            remove_zero_quantity_items(items_dict)
-            print_dict_with_newlines(items_dict)
-            item = input("Which " + Fore.YELLOW +"item " + Fore.WHITE +"would you like to use? "+ Fore.RED +"<c to cancel>" + Fore.WHITE +": ")
+            items_dict, player_health, cancel = item(items_dict, player_name, player_health, player_maxhealth)
 
-
-            #Potion:
-            if item == "potion":
-
-                #If potion is in inventory and potions are greater than 0:
-                if "potion" in items_dict and items_dict["potion"] > 0:
-
-                    #Heal:
-                    print(Fore.GREEN + f"{player_name} " + Fore.WHITE +"used a " + Fore.YELLOW +"potion" + Fore.WHITE + "!")
-                    player_health = player_health + 10
-                    items_dict['potion'] -= 1
-                    #If players health exceeds maxhealth after heal:
-                    if player_health > player_maxhealth:
-                        player_health = player_maxhealth
-                    print(Fore.GREEN + f"{player_name} "+ Fore.WHITE + "healed 10hp, "+ Fore.GREEN+ f"{player_name}s " + Fore.WHITE +"health is now: " + Fore.RED + f"{player_health}/{player_maxhealth}" + Fore.WHITE + ".")
-                    print(f"{player_name} now has {items_dict['potion']} " + Fore.YELLOW + "potions" + Fore.WHITE + ".")
-
-
-                    #combat:
-                    enemy_damage = round(enemy_strength*random.uniform(0,1))
-                    #Enemy Miss:
-                    if enemy_damage == 0:
-                        time.sleep(1)
-                        print(Fore.MAGENTA + f"{enemy_name} " + Fore.WHITE +"missed!")
-
-                    #Enemy Hit:
-                    else:
-                        time.sleep(1)
-                        print("The " + Fore.MAGENTA + f"{enemy_name} " + Fore.WHITE+ "delt " + Fore.RED + f"{enemy_damage} " + Fore.WHITE +"damage to " + Fore.GREEN +f"{player_name}" + Fore.WHITE + ".")
-                        player_health = player_health - enemy_damage
-
-                    #Player Death
-                    if player_health <= 0:
-                        time.sleep(1)
-                        print("Your health is 0.")
-                        time.sleep(1)
-                        print(f"Oh no! " + Fore.GREEN + f"{player_name} " + Fore.WHITE+ "was slain by the " + Fore.MAGENTA+ f"{enemy_name}" + Fore.WHITE+ ".")
-                        return player_health, False, items_dict
-
-
-                    #Player Health Update  
-                    else:
-                        time.sleep(1)
-                        print(Fore.GREEN + f"{player_name}s " + Fore.WHITE + "health is " + Fore.RED +  f"{player_health}/{player_maxhealth}" + Fore.WHITE + ".")
-                        print("")
-                    continue
-
-                #No potions:
+            if cancel == False:
+            #combat:
+                enemy_damage = round(enemy_strength*random.uniform(0,1))
+                #Enemy Miss:
+                if enemy_damage == 0:
+                    time.sleep(1)
+                    print(Fore.MAGENTA + f"{enemy_name} " + Fore.WHITE +"missed!")
+                #Enemy Hit:
                 else:
-                    print("You have no " + Fore.YELLOW +"potions" + Fore.WHITE+ ".")
-                    continue
-
-            #Cancel
-            if item == "c":
+                    time.sleep(1)
+                    print("The " + Fore.MAGENTA + f"{enemy_name} " + Fore.WHITE+ "delt " + Fore.RED + f"{enemy_damage} " + Fore.WHITE +"damage to " + Fore.GREEN +f"{player_name}" + Fore.WHITE + ".")
+                    player_health = player_health - enemy_damage
+                #Player Death
+                if player_health <= 0:
+                    time.sleep(1)
+                    print("Your health is 0.")
+                    time.sleep(1)
+                    print(f"Oh no! " + Fore.GREEN + f"{player_name} " + Fore.WHITE+ "was slain by the " + Fore.MAGENTA+ f"{enemy_name}" + Fore.WHITE+ ".")
+                    return player_health, False, items_dict
+                #Player Health Update  
+                else:
+                    time.sleep(1)
+                    print(Fore.GREEN + f"{player_name}s " + Fore.WHITE + "health is " + Fore.RED +  f"{player_health}/{player_maxhealth}" + Fore.WHITE + ".")
+                    print("")
                 continue
 
-            #invalid input:
             else:
-                print("This item is not in your inventory.")
                 continue
-
 
         #Invalid Input Error:
         elif attack != "attack":
@@ -387,7 +396,6 @@ while player1.health > 0:
                 player1.xp, 
                 player1.xptolevel(), 
                 zone1monster.xp)
-                
             #Level Up:
             player1.xp, player1.level,player1.health,player1.maxhealth,player1.strength,player1.speed = level_up(
                 player1.name, 
@@ -399,57 +407,21 @@ while player1.health > 0:
                 player1.strength, 
                 player1.speed)
 
-
-
     #Stats:
     elif choice =="stats":
         print("")
         print(Fore.BLUE + f"============" + Fore.GREEN +f"\nHero" + Fore.WHITE + f": {player1.name} "+ Fore.RED +f"\nHealth" + Fore.WHITE + f": {player1.health}/{player1.maxhealth}" + Fore.YELLOW +f"\nLevel"+ Fore.WHITE+ f": {player1.level}"+ Fore.YELLOW + f"\nEXP" + Fore.WHITE +f": {player1.xp}/{player1.xptolevel()}\n"+ Fore.MAGENTA + f"Strength" + Fore.WHITE +f": {player1.strength}\n"+ Fore.CYAN + f"Speed" + Fore.WHITE +f": {player1.speed}" + Fore.BLUE +"\n============" + Fore.WHITE)
         print("")
 
-
     #Inventory:        
     elif choice =="inventory":
-        while True:
-            remove_zero_quantity_items(player1.items_dict)
-            #Show inventory:
-            print("")
-            print(Fore.BLUE + "=========="+ Fore.WHITE)
-            print_dict_with_newlines(player1.items_dict)
-            print(Fore.BLUE + "==========" + Fore.WHITE)
-            #Item selection:
-            print("")
-            time.sleep(1)
-            item = input("What " + Fore.YELLOW + "item" + Fore.WHITE + " would you like to use? " + Fore.RED + "<c to cancel>" + Fore.WHITE + ": ")
+        end = False
+        while end == False:
+            player1.items_dict ,player1.health, end = item(player1.items_dict,player1.name ,player1.health, player1.maxhealth)
 
-            #Potion
-            if item == "potion":
-                if "potion" in player1.items_dict and player1.items_dict["potion"] > 0:
-                    print(Fore.GREEN + f"{player1.name} " + Fore.WHITE +"used a " + Fore.YELLOW + "potion"+ Fore.WHITE + "!")
-                    time.sleep(1)
-                    player1.health = player1.health + 10
-                    player1.items_dict['potion'] -= 1
-
-                    if player1.health > player1.maxhealth:
-                        player1.health = player1.maxhealth
-                    print(Fore.GREEN + f"{player_name} " + Fore.WHITE + "healed " + Fore.RED + "10hp" + Fore.WHITE +", " + Fore.GREEN + f"{player_name} " + Fore.WHITE+"health is now " + Fore.RED + f"{player1.health}/{player1.maxhealth}"+ Fore.WHITE+ ".")
-                    time.sleep(1)
-                else:
-                    print("That item is not in your inventory. ")    
-        
-        #Cancel
-            elif item == "c":
-                break
-        
-        #Error
-            else:
-                print("That item is not in your inventory. ")
-
-    
     #Exit:
     elif choice == "finish":
         break
-
 
     #Error:
     else:
